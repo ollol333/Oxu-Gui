@@ -1,0 +1,692 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui", PlayerGui)
+screenGui.Name = "OxuGUI"
+
+local liberationMouse = Instance.new("TextButton")
+liberationMouse.Name = "LiberationMouse"
+liberationMouse.Size = UDim2.new(1, 0, 1, 0)
+liberationMouse.TextTransparency = 1
+liberationMouse.BackgroundTransparency = 1
+liberationMouse.Text = ""
+liberationMouse.Active = false
+liberationMouse.AutoButtonColor = false
+liberationMouse.Interactable = false
+liberationMouse.Visible = true
+liberationMouse.Modal = true
+liberationMouse.Parent = screenGui
+
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 420, 0, 760)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -300)
+mainFrame.BackgroundColor3 = Color3.new(0,0,0)
+mainFrame.BorderColor3 = Color3.new(1,1,1)
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1,0,0,30)
+titleLabel.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+titleLabel.Text = "Oxu GUI"
+titleLabel.TextColor3 = Color3.new(1,1,1)
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextScaled = true
+
+local function createSection(name, yPos, height)
+	local frame = Instance.new("Frame", mainFrame)
+	frame.Size = UDim2.new(1, -20, 0, height)
+	frame.Position = UDim2.new(0, 10, 0, yPos)
+	frame.BackgroundColor3 = Color3.new(0.05,0.05,0.05)
+	frame.BorderColor3 = Color3.new(1,1,1)
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1,0,0,20)
+	label.BackgroundTransparency = 1
+	label.Text = name
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Font = Enum.Font.SourceSansBold
+	label.TextScaled = true
+	return frame
+end
+
+local playerListFrame = createSection("Lista de Jugadores", 40, 125)
+local scrollingPlayers = Instance.new("ScrollingFrame", playerListFrame)
+scrollingPlayers.Size = UDim2.new(1, 0, 1, -20)
+scrollingPlayers.Position = UDim2.new(0, 0, 0, 20)
+scrollingPlayers.BackgroundTransparency = 1
+scrollingPlayers.ScrollBarThickness = 6
+scrollingPlayers.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local UIListLayout = Instance.new("UIListLayout", scrollingPlayers)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local ctrlRightDown = false
+
+local teleportFrame = createSection("Teleport Infinito", 172, 120)
+
+local inputBoxTarget = Instance.new("TextBox", teleportFrame)
+inputBoxTarget.Size = UDim2.new(0,200,0,25)
+inputBoxTarget.Position = UDim2.new(0,10,0,25)
+inputBoxTarget.PlaceholderText = "Nombre jugador"
+inputBoxTarget.Text = ""
+inputBoxTarget.BackgroundColor3 = Color3.new(0,0,0)
+inputBoxTarget.TextColor3 = Color3.new(1,1,1)
+inputBoxTarget.BorderColor3 = Color3.new(1,1,1)
+inputBoxTarget.ClearTextOnFocus = false
+
+local inputBoxKeyStart = Instance.new("TextBox", teleportFrame)
+inputBoxKeyStart.Size = UDim2.new(0,80,0,25)
+inputBoxKeyStart.Position = UDim2.new(0,10,0,55)
+inputBoxKeyStart.PlaceholderText = "Tecla Activar"
+inputBoxKeyStart.Text = ""
+inputBoxKeyStart.BackgroundColor3 = Color3.new(0,0,0)
+inputBoxKeyStart.TextColor3 = Color3.new(1,1,1)
+inputBoxKeyStart.BorderColor3 = Color3.new(1,1,1)
+inputBoxKeyStart.ClearTextOnFocus = false
+
+local inputBoxKeyStop = Instance.new("TextBox", teleportFrame)
+inputBoxKeyStop.Size = UDim2.new(0,80,0,25)
+inputBoxKeyStop.Position = UDim2.new(0,100,0,55)
+inputBoxKeyStop.PlaceholderText = "Tecla Detener"
+inputBoxKeyStop.Text = ""
+inputBoxKeyStop.BackgroundColor3 = Color3.new(0,0,0)
+inputBoxKeyStop.TextColor3 = Color3.new(1,1,1)
+inputBoxKeyStop.BorderColor3 = Color3.new(1,1,1)
+inputBoxKeyStop.ClearTextOnFocus = false
+
+local inputBoxOffset = Instance.new("TextBox", teleportFrame)
+inputBoxOffset.Size = UDim2.new(0,80,0,25)
+inputBoxOffset.Position = UDim2.new(0,190,0,55)
+inputBoxOffset.PlaceholderText = "Offset"
+inputBoxOffset.Text = ""
+inputBoxOffset.BackgroundColor3 = Color3.new(0,0,0)
+inputBoxOffset.TextColor3 = Color3.new(1,1,1)
+inputBoxOffset.BorderColor3 = Color3.new(1,1,1)
+inputBoxOffset.ClearTextOnFocus = false
+
+local applyTeleport = Instance.new("TextButton", teleportFrame)
+applyTeleport.Size = UDim2.new(0,100,0,25)
+applyTeleport.Position = UDim2.new(0,10,0,85)
+applyTeleport.Text = "Aplicar"
+applyTeleport.BackgroundColor3 = Color3.new(0,0,0)
+applyTeleport.TextColor3 = Color3.new(1,1,1)
+applyTeleport.BorderColor3 = Color3.new(1,1,1)
+
+local infiniteTeleporting = false
+local connInfinite, targetHRP, stundOffset = nil, nil, 0
+local ctrlActivo = true
+
+local function refreshPlayerList()
+	if ctrlRightDown then return end
+	for _, child in ipairs(scrollingPlayers:GetChildren()) do
+		if child:IsA("TextButton") then
+			child:Destroy()
+		end
+	end
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			local btn = Instance.new("TextButton", scrollingPlayers)
+			btn.Size = UDim2.new(1, -4, 0, 25)
+			btn.Text = plr.Name
+			btn.BackgroundColor3 = Color3.new(0,0,0)
+			btn.TextColor3 = Color3.new(1,1,1)
+			btn.BorderColor3 = Color3.new(1,1,1)
+			btn.MouseButton1Click:Connect(function()
+				if inputBoxTarget then
+					inputBoxTarget.Text = plr.Name
+				end
+			end)
+		end
+	end
+	scrollingPlayers.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+end
+
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scrollingPlayers.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+end)
+
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
+refreshPlayerList()
+
+applyTeleport.MouseButton1Click:Connect(function()
+	if not ctrlActivo then return end
+	local targetPlayer = Players:FindFirstChild(inputBoxTarget.Text)
+	stundOffset = tonumber(inputBoxOffset.Text) or 0
+	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		targetHRP = targetPlayer.Character.HumanoidRootPart
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		ctrlActivo = not ctrlActivo
+		if not ctrlActivo then
+			infiniteTeleporting = false
+			if connInfinite then connInfinite:Disconnect() end
+		end
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+	if not ctrlActivo then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode.Name == inputBoxKeyStart.Text then
+			infiniteTeleporting = true
+			local char = LocalPlayer.Character
+			if char and char:FindFirstChild("HumanoidRootPart") and targetHRP then
+				local hrp = char.HumanoidRootPart
+				if connInfinite then connInfinite:Disconnect() end
+				connInfinite = RunService.Heartbeat:Connect(function()
+					if infiniteTeleporting then
+						local behindOffset = -targetHRP.CFrame.LookVector * stundOffset
+						hrp.CFrame = CFrame.new(targetHRP.Position + behindOffset + Vector3.new(0,0.01,0), targetHRP.Position)
+					end
+				end)
+			end
+		elseif input.KeyCode.Name == inputBoxKeyStop.Text then
+			infiniteTeleporting = false
+			if connInfinite then connInfinite:Disconnect() end
+		elseif input.KeyCode == Enum.KeyCode.M then
+			if ctrlActivo then
+				mainFrame.Visible = not mainFrame.Visible
+				if mainFrame.Visible then
+					liberationMouse.Modal = true
+				else
+					liberationMouse.Modal = false
+				end
+			end
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		ctrlRightDown = false
+	end
+end)
+
+refreshPlayerList()
+
+local partFrame = createSection("Part fija", 302, 85)
+local inputPartSize = Instance.new("TextBox", partFrame)
+inputPartSize.Size = UDim2.new(0,80,0,25)
+inputPartSize.Position = UDim2.new(0,10,0,25)
+inputPartSize.PlaceholderText = "Size"
+inputPartSize.Text = ""
+inputPartSize.BackgroundColor3 = Color3.new(0,0,0)
+inputPartSize.TextColor3 = Color3.new(1,1,1)
+inputPartSize.BorderColor3 = Color3.new(1,1,1)
+inputPartSize.ClearTextOnFocus = false
+
+local inputPartOffset = Instance.new("TextBox", partFrame)
+inputPartOffset.Size = UDim2.new(0,80,0,25)
+inputPartOffset.Position = UDim2.new(0,100,0,25)
+inputPartOffset.PlaceholderText = "Offset"
+inputPartOffset.Text = ""
+inputPartOffset.BackgroundColor3 = Color3.new(0,0,0)
+inputPartOffset.TextColor3 = Color3.new(1,1,1)
+inputPartOffset.BorderColor3 = Color3.new(1,1,1)
+inputPartOffset.ClearTextOnFocus = false
+
+local createPartBtn = Instance.new("TextButton", partFrame)
+createPartBtn.Size = UDim2.new(0,80,0,25)
+createPartBtn.Position = UDim2.new(0,10,0,55)
+createPartBtn.Text = "Crear"
+createPartBtn.BackgroundColor3 = Color3.new(0,0,0)
+createPartBtn.TextColor3 = Color3.new(1,1,1)
+createPartBtn.BorderColor3 = Color3.new(1,1,1)
+
+local followPart
+local ctrlActivo = true
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		ctrlActivo = not ctrlActivo
+	end
+end)
+
+createPartBtn.MouseButton1Click:Connect(function()
+	if not ctrlActivo then return end
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		if followPart then followPart:Destroy() end
+		followPart = Instance.new("Part")
+		local size = tonumber(inputPartSize.Text) or 8
+		local offset = tonumber(inputPartOffset.Text) or 10
+		followPart.Size = Vector3.new(size,size,size)
+		followPart.Anchored = true
+		followPart.CanCollide = true
+		followPart.Color = Color3.new(1,0,0)
+		followPart.Position = char.HumanoidRootPart.Position + char.HumanoidRootPart.CFrame.LookVector * offset + Vector3.new(0,size/2,0)
+		followPart.Parent = workspace
+	end
+end)
+
+local noColFrame = createSection("Quitar Colisión", 395, 85)
+
+local inputNoColStart = Instance.new("TextBox", noColFrame)
+inputNoColStart.Size = UDim2.new(0,80,0,25)
+inputNoColStart.Position = UDim2.new(0,10,0,25)
+inputNoColStart.PlaceholderText = "Tecla Activar"
+inputNoColStart.Text = ""
+inputNoColStart.BackgroundColor3 = Color3.new(0,0,0)
+inputNoColStart.TextColor3 = Color3.new(1,1,1)
+inputNoColStart.BorderColor3 = Color3.new(1,1,1)
+inputNoColStart.ClearTextOnFocus = false
+
+local inputNoColStop = Instance.new("TextBox", noColFrame)
+inputNoColStop.Size = UDim2.new(0,80,0,25)
+inputNoColStop.Position = UDim2.new(0,100,0,25)
+inputNoColStop.PlaceholderText = "Tecla Detener"
+inputNoColStop.Text = ""
+inputNoColStop.BackgroundColor3 = Color3.new(0,0,0)
+inputNoColStop.TextColor3 = Color3.new(1,1,1)
+inputNoColStop.BorderColor3 = Color3.new(1,1,1)
+inputNoColStop.ClearTextOnFocus = false
+
+local confirmNoColBtn = Instance.new("TextButton", noColFrame)
+confirmNoColBtn.Size = UDim2.new(0,100,0,25)
+confirmNoColBtn.Position = UDim2.new(0,10,0,55)
+confirmNoColBtn.Text = "Confirmar"
+confirmNoColBtn.BackgroundColor3 = Color3.new(0,0,0)
+confirmNoColBtn.TextColor3 = Color3.new(1,1,1)
+confirmNoColBtn.BorderColor3 = Color3.new(1,1,1)
+
+local keyStartConfirm, keyStopConfirm
+confirmNoColBtn.MouseButton1Click:Connect(function()
+	keyStartConfirm = inputNoColStart.Text
+	keyStopConfirm = inputNoColStop.Text
+end)
+
+local noCollideActive, connNoCol, originalCollideStates = false, nil, {}
+local ctrlActivo = true
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+local function setNoCollision(state)
+	local char = LocalPlayer.Character
+	if not char then return end
+	for _, part in ipairs(char:GetDescendants()) do
+		if part:IsA("BasePart") then
+			if state then
+				originalCollideStates[part] = part.CanCollide
+				part.CanCollide = false
+			else
+				if originalCollideStates[part] ~= nil then
+					part.CanCollide = originalCollideStates[part]
+				end
+			end
+		end
+	end
+	noCollideActive = state
+end
+
+local xrayFrame = createSection("Xray-Hitbox", 485, 60)
+local toggleXrayBtn = Instance.new("TextButton", xrayFrame)
+toggleXrayBtn.Size = UDim2.new(0, 100, 0, 25)
+toggleXrayBtn.Position = UDim2.new(0, 10, 0, 25)
+toggleXrayBtn.Text = "Activar"
+toggleXrayBtn.BackgroundColor3 = Color3.new(0, 0, 0)
+toggleXrayBtn.TextColor3 = Color3.new(1, 1, 1)
+toggleXrayBtn.BorderColor3 = Color3.new(1, 1, 1)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+local xrayOn = false
+local originalMaterials = {}
+local highlights = {}
+
+local function applyXray()
+	if next(originalMaterials) == nil then
+		for _, obj in ipairs(workspace:GetDescendants()) do
+			if obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
+				originalMaterials[obj] = obj.Material
+				obj.Material = Enum.Material.ForceField
+			end
+		end
+	end
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character then
+			if not highlights[plr] then
+				local highlight = Instance.new("Highlight")
+				highlight.Adornee = plr.Character
+				highlight.FillColor = Color3.fromRGB(0, 255, 0)
+				highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+				highlight.OutlineTransparency = 0
+				highlight.FillTransparency = 0.5
+				highlight.Parent = plr.Character
+				highlights[plr] = highlight
+			end
+		end
+	end
+end
+
+local function removeXray()
+	for obj, mat in pairs(originalMaterials) do
+		if obj and obj.Parent then
+			obj.Material = mat
+		end
+	end
+	for _, highlight in pairs(highlights) do
+		if highlight and highlight.Parent then
+			highlight:Destroy()
+		end
+	end
+	originalMaterials = {}
+	highlights = {}
+end
+
+-- === PANEL DE PROMPTS TELEPORT ===
+local active = true
+
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
+		active = not active
+	end
+end)
+
+local mainFrame = createSection("Teleport Prompts", 300, 250)
+mainFrame.Size = UDim2.new(1, -20, 0, 200)
+mainFrame.Position = UDim2.new(0, 10, 0, 550)
+
+local promptCount = 0
+local promptsData = {}
+local promptsVisible = true
+local keyCreate = ""
+local keyDelete = ""
+local keyPrompt = Enum.KeyCode.E
+local customText = ""
+local styleCustom = false
+
+local scrollingPrompts = Instance.new("ScrollingFrame", mainFrame)
+scrollingPrompts.Position = UDim2.new(0.5, 0, 0, 155)
+scrollingPrompts.AnchorPoint = Vector2.new(0.5, 0.5)
+scrollingPrompts.Size = UDim2.new(0.98, 0, 0.4, 0)
+scrollingPrompts.BackgroundTransparency = 1
+scrollingPrompts.ScrollBarThickness = 6
+scrollingPrompts.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local stroke = Instance.new("UIStroke", scrollingPrompts)
+stroke.Color = Color3.new(1, 1, 1)
+stroke.Thickness = 1
+
+local UIListLayoutPrompts = Instance.new("UIListLayout", scrollingPrompts)
+UIListLayoutPrompts.SortOrder = Enum.SortOrder.LayoutOrder
+
+local inputCreateKey = Instance.new("TextBox", mainFrame)
+inputCreateKey.Size = UDim2.new(0,80,0,25)
+inputCreateKey.Position = UDim2.new(0,10,0,25)
+inputCreateKey.PlaceholderText = "Tecla Crear"
+inputCreateKey.Text = keyCreate
+inputCreateKey.BackgroundColor3 = Color3.new(0,0,0)
+inputCreateKey.TextColor3 = Color3.new(1,1,1)
+inputCreateKey.BorderColor3 = Color3.new(1,1,1)
+inputCreateKey.ClearTextOnFocus = false
+
+local inputDeleteKey = Instance.new("TextBox", mainFrame)
+inputDeleteKey.Size = UDim2.new(0,80,0,25)
+inputDeleteKey.Position = UDim2.new(0,100,0,25)
+inputDeleteKey.PlaceholderText = "Tecla Eliminar"
+inputDeleteKey.Text = keyDelete
+inputDeleteKey.BackgroundColor3 = Color3.new(0,0,0)
+inputDeleteKey.TextColor3 = Color3.new(1,1,1)
+inputDeleteKey.BorderColor3 = Color3.new(1,1,1)
+inputDeleteKey.ClearTextOnFocus = false
+
+local inputObjectText = Instance.new("TextBox", mainFrame)
+inputObjectText.Size = UDim2.new(0,170,0,25)
+inputObjectText.Position = UDim2.new(0,10,0,55)
+inputObjectText.PlaceholderText = "Texto del Prompt"
+inputObjectText.Text = ""
+inputObjectText.BackgroundColor3 = Color3.new(0,0,0)
+inputObjectText.TextColor3 = Color3.new(1,1,1)
+inputObjectText.BorderColor3 = Color3.new(1,1,1)
+inputObjectText.ClearTextOnFocus = false
+
+local inputPromptKey = Instance.new("TextBox", mainFrame)
+inputPromptKey.Size = UDim2.new(0,80,0,25)
+inputPromptKey.Position = UDim2.new(0,190,0,55)
+inputPromptKey.PlaceholderText = "Tecla Prompt"
+inputPromptKey.Text = "E"
+inputPromptKey.BackgroundColor3 = Color3.new(0,0,0)
+inputPromptKey.TextColor3 = Color3.new(1,1,1)
+inputPromptKey.BorderColor3 = Color3.new(1,1,1)
+inputPromptKey.ClearTextOnFocus = false
+
+local confirmBtn = Instance.new("TextButton", mainFrame)
+confirmBtn.Size = UDim2.new(0,80,0,25)
+confirmBtn.Position = UDim2.new(0,10,0,85)
+confirmBtn.Text = "Confirmar"
+confirmBtn.BackgroundColor3 = Color3.new(0,0,0)
+confirmBtn.TextColor3 = Color3.new(1,1,1)
+confirmBtn.BorderColor3 = Color3.new(1,1,1)
+
+local deleteAllBtn = Instance.new("TextButton", mainFrame)
+deleteAllBtn.Size = UDim2.new(0,100,0,25)
+deleteAllBtn.Position = UDim2.new(0,100,0,85)
+deleteAllBtn.Text = "Eliminar Todos"
+deleteAllBtn.BackgroundColor3 = Color3.new(0,0,0)
+deleteAllBtn.TextColor3 = Color3.new(1,1,1)
+deleteAllBtn.BorderColor3 = Color3.new(1,1,1)
+
+local toggleVisibilityBtn = Instance.new("TextButton", mainFrame)
+toggleVisibilityBtn.Size = UDim2.new(0,100,0,25)
+toggleVisibilityBtn.Position = UDim2.new(0,210,0,85)
+toggleVisibilityBtn.Text = "Ocultar Prompts"
+toggleVisibilityBtn.BackgroundColor3 = Color3.new(0,0,0)
+toggleVisibilityBtn.TextColor3 = Color3.new(1,1,1)
+toggleVisibilityBtn.BorderColor3 = Color3.new(1,1,1)
+
+local styleToggleBtn = Instance.new("TextButton", mainFrame)
+styleToggleBtn.Size = UDim2.new(0,100,0,25)
+styleToggleBtn.Position = UDim2.new(0,190,0,25)
+styleToggleBtn.Text = "Style: Default"
+styleToggleBtn.BackgroundColor3 = Color3.new(0,0,0)
+styleToggleBtn.TextColor3 = Color3.new(1,1,1)
+styleToggleBtn.BorderColor3 = Color3.new(1,1,1)
+
+local promptsFolder = Instance.new("Folder")
+promptsFolder.Name = "TeleportPrompts"
+promptsFolder.Parent = workspace
+
+local function refreshPromptList()
+	for _, child in ipairs(scrollingPrompts:GetChildren()) do
+		if child:IsA("TextButton") then
+			child:Destroy()
+		end
+	end
+	for i, data in ipairs(promptsData) do
+		local btn = Instance.new("TextButton", scrollingPrompts)
+		btn.Size = UDim2.new(1, -4, 0, 25)
+		btn.Text = data.text
+		btn.BackgroundColor3 = Color3.new(0,0,0)
+		btn.TextColor3 = Color3.new(1,1,1)
+		btn.BorderColor3 = Color3.new(1,1,1)
+		btn.MouseButton1Click:Connect(function()
+			if not active then return end
+			local char = LocalPlayer.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				char.HumanoidRootPart.CFrame = CFrame.new(data.position)
+			end
+		end)
+	end
+	scrollingPrompts.CanvasSize = UDim2.new(0, 0, 0, UIListLayoutPrompts.AbsoluteContentSize.Y)
+end
+
+local function createTeleportPrompt(position)
+	if not active then return end
+	promptCount += 1
+	local part = Instance.new("Part")
+	part.Size = Vector3.new(1,1,1)
+	part.Anchored = true
+	part.Transparency = 1
+	part.CanCollide = false
+	part.Position = position
+	part.Parent = promptsFolder
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ObjectText = "Teleport"
+	local labelText = customText ~= "" and customText or ("Save ("..promptCount..")")
+	prompt.ActionText = labelText
+	prompt.KeyboardKeyCode = keyPrompt
+	prompt.MaxActivationDistance = math.huge
+	prompt.Style = styleCustom and Enum.ProximityPromptStyle.Custom or Enum.ProximityPromptStyle.Default
+	prompt.Parent = part
+
+	prompt.Triggered:Connect(function(plr)
+		if not active then return end
+		if plr == LocalPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+		end
+	end)
+
+	table.insert(promptsData, {text = labelText, position = position, part = part, prompt = prompt})
+	refreshPromptList()
+end
+
+local function deleteAllPrompts()
+	if not active then return end
+	promptCount = 0
+	for _, data in ipairs(promptsData) do
+		if data.part then data.part:Destroy() end
+	end
+	promptsData = {}
+	refreshPromptList()
+end
+
+local function togglePromptsVisibility()
+	if not active then return end
+	promptsVisible = not promptsVisible
+	for _, data in ipairs(promptsData) do
+		if data.prompt then
+			data.prompt.Enabled = promptsVisible
+		end
+	end
+	toggleVisibilityBtn.Text = promptsVisible and "Ocultar Prompts" or "Mostrar Prompts"
+end
+
+local function togglePromptStyle()
+	if not active then return end
+	styleCustom = not styleCustom
+	for _, data in ipairs(promptsData) do
+		if data.prompt then
+			data.prompt.Style = styleCustom and Enum.ProximityPromptStyle.Custom or Enum.ProximityPromptStyle.Default
+		end
+	end
+	styleToggleBtn.Text = styleCustom and "Style: Custom" or "Style: Default"
+end
+
+confirmBtn.MouseButton1Click:Connect(function()
+	if not active then return end
+	keyCreate = inputCreateKey.Text ~= "" and inputCreateKey.Text or keyCreate
+	keyDelete = inputDeleteKey.Text ~= "" and inputDeleteKey.Text or keyDelete
+	customText = inputObjectText.Text
+	local newKey = inputPromptKey.Text ~= "" and inputPromptKey.Text or "E"
+	keyPrompt = Enum.KeyCode[newKey] or Enum.KeyCode.E
+end)
+
+deleteAllBtn.MouseButton1Click:Connect(deleteAllPrompts)
+toggleVisibilityBtn.MouseButton1Click:Connect(togglePromptsVisibility)
+styleToggleBtn.MouseButton1Click:Connect(togglePromptStyle)
+
+-- Teclas rápidas
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode.Name:lower() == keyCreate:lower() then
+			local char = LocalPlayer.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				createTeleportPrompt(char.HumanoidRootPart.Position)
+			end
+		elseif input.KeyCode.Name:lower() == keyDelete:lower() then
+			deleteAllPrompts()
+		end
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		ctrlActivo = not ctrlActivo
+		if not ctrlActivo then
+			if xrayOn then
+				removeXray()
+				xrayOn = false
+				toggleXrayBtn.Text = "Activar"
+			end
+			if noCollideActive then
+				setNoCollision(false)
+				if connNoCol then connNoCol:Disconnect() end
+			end
+		end
+	end
+end)
+
+toggleXrayBtn.MouseButton1Click:Connect(function()
+	if not ctrlActivo then return end
+	if not xrayOn then
+		applyXray()
+		toggleXrayBtn.Text = "Desactivar"
+	else
+		removeXray()
+		toggleXrayBtn.Text = "Activar"
+	end
+	xrayOn = not xrayOn
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+	if not ctrlActivo then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if keyStartConfirm and input.KeyCode.Name:lower() == keyStartConfirm:lower() then
+			noCollideActive = true
+			local char = LocalPlayer.Character
+			if char then
+				originalCollideStates = {}
+				for _, part in ipairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						originalCollideStates[part] = part.CanCollide
+					end
+				end
+				if connNoCol then connNoCol:Disconnect() end
+				connNoCol = RunService.Heartbeat:Connect(function()
+					if noCollideActive then
+						task.wait(0.01)
+						for _, part in ipairs(char:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.CanCollide = false
+							end
+						end
+					end
+				end)
+			end
+		elseif keyStopConfirm and input.KeyCode.Name:lower() == keyStopConfirm:lower() then
+			noCollideActive = false
+			if connNoCol then connNoCol:Disconnect() end
+			local char = LocalPlayer.Character
+			if char then
+				for part, state in pairs(originalCollideStates) do
+					if part and part:IsA("BasePart") then
+						part.CanCollide = state
+					end
+				end
+			end
+		end
+	end
+end)
+
+refreshPlayerList()

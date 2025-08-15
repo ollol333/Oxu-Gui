@@ -1,0 +1,902 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local RunService = game:GetService("RunService")
+
+local screenGui = Instance.new("ScreenGui", PlayerGui)
+screenGui.Name = "OxuGUI2"
+
+local liberationMouse = Instance.new("TextButton")
+liberationMouse.Name = "LiberationMouse"
+liberationMouse.Size = UDim2.new(1, 0, 1, 0)
+liberationMouse.TextTransparency = 1
+liberationMouse.BackgroundTransparency = 1
+liberationMouse.Text = ""
+liberationMouse.Active = false
+liberationMouse.AutoButtonColor = false
+liberationMouse.Interactable = false
+liberationMouse.Visible = true
+liberationMouse.Modal = true
+liberationMouse.Parent = screenGui
+
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 420, 0, 660)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -325)
+mainFrame.BackgroundColor3 = Color3.new(0,0,0)
+mainFrame.BorderColor3 = Color3.new(1,1,1)
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1,0,0,30)
+titleLabel.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+titleLabel.Text = "Oxu GUI 2"
+titleLabel.TextColor3 = Color3.new(1,1,1)
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextScaled = true
+
+local function createSection(name, yPos, height)
+	local frame = Instance.new("Frame", mainFrame)
+	frame.Size = UDim2.new(1, -20, 0, height)
+	frame.Position = UDim2.new(0, 10, 0, yPos)
+	frame.BackgroundColor3 = Color3.new(0.05,0.05,0.05)
+	frame.BorderColor3 = Color3.new(1,1,1)
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1,0,0,20)
+	label.BackgroundTransparency = 1
+	label.Text = name
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Font = Enum.Font.SourceSansBold
+	label.TextScaled = true
+	return frame
+end
+
+local speedFrame = createSection("Cambiar Speed / JumpHeight", 34, 85)
+local inputSpeed = Instance.new("TextBox", speedFrame)
+inputSpeed.Size = UDim2.new(0,80,0,25)
+inputSpeed.Position = UDim2.new(0,10,0,25)
+inputSpeed.PlaceholderText = "Speed"
+inputSpeed.Text = ""
+inputSpeed.BackgroundColor3 = Color3.new(0,0,0)
+inputSpeed.TextColor3 = Color3.new(1,1,1)
+inputSpeed.BorderColor3 = Color3.new(1,1,1)
+
+local inputJump = Instance.new("TextBox", speedFrame)
+inputJump.Size = UDim2.new(0,80,0,25)
+inputJump.Position = UDim2.new(0,100,0,25)
+inputJump.PlaceholderText = "JumpHeight"
+inputJump.Text = ""
+inputJump.BackgroundColor3 = Color3.new(0,0,0)
+inputJump.TextColor3 = Color3.new(1,1,1)
+inputJump.BorderColor3 = Color3.new(1,1,1)
+
+local applySpeedBtn = Instance.new("TextButton", speedFrame)
+applySpeedBtn.Size = UDim2.new(0,80,0,25)
+applySpeedBtn.Position = UDim2.new(0,10,0,55)
+applySpeedBtn.Text = "Aplicar"
+applySpeedBtn.BackgroundColor3 = Color3.new(0,0,0)
+applySpeedBtn.TextColor3 = Color3.new(1,1,1)
+applySpeedBtn.BorderColor3 = Color3.new(1,1,1)
+
+local trussFrame = createSection("Crear Truss", 125, 85)
+trussFrame.BackgroundColor3 = Color3.new(0,0,0)
+
+local inputTrussSize = Instance.new("TextBox", trussFrame)
+inputTrussSize.Size = UDim2.new(0,80,0,25)
+inputTrussSize.Position = UDim2.new(0,10,0,25)
+inputTrussSize.PlaceholderText = "Size"
+inputTrussSize.Text = ""
+inputTrussSize.BackgroundColor3 = Color3.new(0,0,0)
+inputTrussSize.TextColor3 = Color3.new(1,1,1)
+inputTrussSize.BorderColor3 = Color3.new(1,1,1)
+
+local inputHeightOffset = Instance.new("TextBox", trussFrame)
+inputHeightOffset.Size = UDim2.new(0,80,0,25)
+inputHeightOffset.Position = UDim2.new(0,100,0,25)
+inputHeightOffset.PlaceholderText = "Offset Vertical"
+inputHeightOffset.Text = ""
+inputHeightOffset.BackgroundColor3 = Color3.new(0,0,0)
+inputHeightOffset.TextColor3 = Color3.new(1,1,1)
+inputHeightOffset.BorderColor3 = Color3.new(1,1,1)
+
+local inputFrontOffset = Instance.new("TextBox", trussFrame)
+inputFrontOffset.Size = UDim2.new(0,80,0,25)
+inputFrontOffset.Position = UDim2.new(0,190,0,25)
+inputFrontOffset.PlaceholderText = "Offset Frontal"
+inputFrontOffset.Text = ""
+inputFrontOffset.BackgroundColor3 = Color3.new(0,0,0)
+inputFrontOffset.TextColor3 = Color3.new(1,1,1)
+inputFrontOffset.BorderColor3 = Color3.new(1,1,1)
+
+local inputOrientation = Instance.new("TextBox", trussFrame)
+inputOrientation.Size = UDim2.new(0,80,0,25)
+inputOrientation.Position = UDim2.new(0,280,0,25)
+inputOrientation.PlaceholderText = "Orientación"
+inputOrientation.Text = ""
+inputOrientation.BackgroundColor3 = Color3.new(0,0,0)
+inputOrientation.TextColor3 = Color3.new(1,1,1)
+inputOrientation.BorderColor3 = Color3.new(1,1,1)
+
+local holdPlace = Instance.new("TextLabel", trussFrame)
+holdPlace.Size = UDim2.new(0,1,0,1)
+holdPlace.Position = UDim2.new(0,0,0,0)
+holdPlace.Text = ""
+holdPlace.Name = "HoldPlace_OrientOrder"
+holdPlace.Visible = false
+holdPlace.Text = "Orden ejes: Y,X,Z"
+
+local createTrussBtn = Instance.new("TextButton", trussFrame)
+createTrussBtn.Size = UDim2.new(0,80,0,25)
+createTrussBtn.Position = UDim2.new(0,10,0,55)
+createTrussBtn.Text = "Crear"
+createTrussBtn.BackgroundColor3 = Color3.new(0,0,0)
+createTrussBtn.TextColor3 = Color3.new(1,1,1)
+createTrussBtn.BorderColor3 = Color3.new(1,1,1)
+
+local clearTrussBtn = Instance.new("TextButton", trussFrame)
+clearTrussBtn.Size = UDim2.new(0,80,0,25)
+clearTrussBtn.Position = UDim2.new(0,100,0,55)
+clearTrussBtn.Text = "Borrar Todos"
+clearTrussBtn.BackgroundColor3 = Color3.new(0,0,0)
+clearTrussBtn.TextColor3 = Color3.new(1,1,1)
+clearTrussBtn.BorderColor3 = Color3.new(1,1,1)
+
+local playerListFrame = createSection("Lista de Jugadores", 348, 100)
+playerListFrame.BackgroundColor3 = Color3.new(0,0,0)
+
+local scrollingPlayers = Instance.new("ScrollingFrame", playerListFrame)
+scrollingPlayers.Size = UDim2.new(1, 0, 1, -20)
+scrollingPlayers.Position = UDim2.new(0, 0, 0, 20)
+scrollingPlayers.BackgroundTransparency = 1
+scrollingPlayers.ScrollBarThickness = 6
+scrollingPlayers.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local UIListLayout = Instance.new("UIListLayout", scrollingPlayers)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local function refreshPlayerList()
+	for _, child in ipairs(scrollingPlayers:GetChildren()) do
+		if child:IsA("TextButton") then
+			child:Destroy()
+		end
+	end
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			local btn = Instance.new("TextButton", scrollingPlayers)
+			btn.Size = UDim2.new(1, -4, 0, 25)
+			btn.Text = plr.Name
+			btn.BackgroundColor3 = Color3.new(0,0,0)
+			btn.TextColor3 = Color3.new(1,1,1)
+			btn.BorderColor3 = Color3.new(1,1,1)
+			btn.MouseButton1Click:Connect(function()
+				local char = LocalPlayer.Character
+				if char and char:FindFirstChild("HumanoidRootPart") and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+					char.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+				end
+			end)
+		end
+	end
+	scrollingPlayers.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+end
+
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scrollingPlayers.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+end)
+
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
+refreshPlayerList()
+
+local trussesCreated = {}
+local scriptActive = true
+local ctrlPressed = false
+
+applySpeedBtn.MouseButton1Click:Connect(function()
+	if not scriptActive or ctrlPressed then return end
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("Humanoid") then
+		local hum = char.Humanoid
+		hum.WalkSpeed = tonumber(inputSpeed.Text) or hum.WalkSpeed
+		hum.JumpHeight = tonumber(inputJump.Text) or hum.JumpHeight
+		hum.JumpPower = tonumber(inputJump.Text) or hum.JumpPower
+	end
+end)
+
+createTrussBtn.MouseButton1Click:Connect(function()
+	if not scriptActive or ctrlPressed then return end
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		local truss = Instance.new("TrussPart")
+		local size = tonumber(inputTrussSize.Text) or 4
+		local heightOffset = tonumber(inputHeightOffset.Text) or 0
+		local frontOffset = tonumber(inputFrontOffset.Text) or 0
+		truss.Size = Vector3.new(size, size, size)
+		truss.Anchored = true
+		truss.CanCollide = true
+		truss.Color = Color3.new(1,0,0)
+
+		local lookVector = char.HumanoidRootPart.CFrame.LookVector
+		local basePos = char.HumanoidRootPart.Position + lookVector * frontOffset + Vector3.new(0,heightOffset,0)
+		local orientationText = inputOrientation.Text
+		local cframeRot
+
+		if orientationText == "" then
+			cframeRot = CFrame.new(basePos) * CFrame.Angles(0, char.HumanoidRootPart.Orientation.Y * math.pi/180, 0)
+		else
+			local vals = {}
+			for num in string.gmatch(orientationText, "[-]?%d+%.?%d*") do
+				table.insert(vals, tonumber(num))
+			end
+			local y = vals[1] or 0
+			local x = vals[2] or 0
+			local z = vals[3] or 0
+			cframeRot = CFrame.new(basePos) * CFrame.Angles(x * math.pi/180, y * math.pi/180, z * math.pi/180)
+		end
+
+		truss.CFrame = cframeRot
+		truss.Parent = workspace
+		table.insert(trussesCreated, truss)
+	end
+end)
+
+clearTrussBtn.MouseButton1Click:Connect(function()
+	if ctrlPressed then return end
+	for _, t in ipairs(trussesCreated) do
+		if t and t.Parent then t:Destroy() end
+	end
+	trussesCreated = {}
+end)
+
+local mapXrayBtn = createSection("Xray Mapa", 215, 60)
+local toggleMapXray = Instance.new("TextButton", mapXrayBtn)
+toggleMapXray.Size = UDim2.new(0,100,0,25)
+toggleMapXray.Position = UDim2.new(0,10,0,25)
+toggleMapXray.Text = "Activar"
+toggleMapXray.BackgroundColor3 = Color3.new(0,0,0)
+toggleMapXray.TextColor3 = Color3.new(1,1,1)
+toggleMapXray.BorderColor3 = Color3.new(1,1,1)
+
+local mapXrayOn = false
+local originalMaterialsMap = {}
+local mapHighlights = {}
+
+local function applyMapXray()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if (obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation")) and not Players:GetPlayerFromCharacter(obj.Parent) then
+			originalMaterialsMap[obj] = {Material=obj.Material, Transparency=obj.Transparency}
+			obj.Material = Enum.Material.Glass
+			obj.Transparency = 1
+			local hl = Instance.new("Highlight")
+			hl.Adornee = obj
+			hl.FillColor = obj.Color
+			hl.OutlineColor = Color3.new(1,1,1)
+			hl.FillTransparency = 0.5
+			hl.Parent = obj
+			mapHighlights[obj] = hl
+		end
+	end
+end
+
+local function removeMapXray()
+	for obj, mat in pairs(originalMaterialsMap) do
+		if obj and obj.Parent then
+			obj.Material = mat.Material
+			obj.Transparency = mat.Transparency
+		end
+	end
+	for _, hl in pairs(mapHighlights) do
+		if hl and hl.Parent then hl:Destroy() end
+	end
+	originalMaterialsMap = {}
+	mapHighlights = {}
+end
+
+toggleMapXray.MouseButton1Click:Connect(function()
+	if ctrlPressed then return end
+	if not mapXrayOn then
+		applyMapXray()
+		toggleMapXray.Text = "Desactivar"
+	else
+		removeMapXray()
+		toggleMapXray.Text = "Activar"
+	end
+	mapXrayOn = not mapXrayOn
+end)
+
+local playerXrayBtn = createSection("Xray Jugadores", 281, 60)
+local togglePlayerXray = Instance.new("TextButton", playerXrayBtn)
+togglePlayerXray.Size = UDim2.new(0,100,0,25)
+togglePlayerXray.Position = UDim2.new(0,10,0,25)
+togglePlayerXray.Text = "Activar"
+togglePlayerXray.BackgroundColor3 = Color3.new(0,0,0)
+togglePlayerXray.TextColor3 = Color3.new(1,1,1)
+togglePlayerXray.BorderColor3 = Color3.new(1,1,1)
+
+local playerXrayOn = false
+local playerHighlights = {}
+local playerBillboards = {}
+
+local function applyPlayerXray()
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character then
+			if not playerHighlights[plr] then
+				local hl = Instance.new("Highlight")
+				hl.Adornee = plr.Character
+				hl.FillColor = Color3.new(0, 1, 0.501961)
+				hl.OutlineColor = Color3.new(1, 1, 1)
+				hl.FillTransparency = 0.5
+				hl.Parent = plr.Character
+				playerHighlights[plr] = hl
+			end
+			if not playerBillboards[plr] then
+				local billboard = Instance.new("BillboardGui")
+				billboard.Name = "ESPBillboard"
+				billboard.Size = UDim2.new(0,150,0,50)
+				billboard.AlwaysOnTop = true
+				billboard.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
+				billboard.Parent = plr.Character
+
+				local nameLabel = Instance.new("TextLabel", billboard)
+				nameLabel.Size = UDim2.new(1,0,0.5,0)
+				nameLabel.BackgroundTransparency = 1
+				nameLabel.TextColor3 = Color3.new(1, 1, 1)
+				nameLabel.TextScaled = true
+				nameLabel.Font = Enum.Font.SourceSansBold
+				nameLabel.Text = plr.Name
+
+				local distLabel = Instance.new("TextLabel", billboard)
+				distLabel.Size = UDim2.new(1,0,0.5,0)
+				distLabel.Position = UDim2.new(0,0,0.5,0)
+				distLabel.BackgroundTransparency = 1
+				distLabel.TextColor3 = Color3.new(1,1,0)
+				distLabel.TextScaled = true
+				distLabel.Font = Enum.Font.SourceSans
+				distLabel.Text = "Distancia: 0"
+
+				playerBillboards[plr] = distLabel
+			end
+		end
+	end
+end
+
+local function updateBillboardTransparency()
+	for plr, label in pairs(playerBillboards) do
+		if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+			local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+			label.Text = "Distancia: " .. math.floor(dist)
+			local transparency = math.clamp(dist / 200, 0, 1)
+			label.TextTransparency = transparency
+			label.Parent:FindFirstChildOfClass("TextLabel").TextTransparency = transparency
+		end
+	end
+end
+
+local function removePlayerXray()
+	for _, hl in pairs(playerHighlights) do
+		if hl and hl.Parent then hl:Destroy() end
+	end
+	for plr, label in pairs(playerBillboards) do
+		if label and label.Parent then label.Parent:Destroy() end
+	end
+	playerHighlights = {}
+	playerBillboards = {}
+end
+
+RunService.RenderStepped:Connect(updateBillboardTransparency)
+
+local mainFrame = createSection("Fly & FreeCam", 540, 110)
+mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+
+local flyKeyBox = Instance.new("TextBox", mainFrame)
+flyKeyBox.Size = UDim2.new(0, 80, 0, 25)
+flyKeyBox.Position = UDim2.new(0, 10, 0, 25)
+flyKeyBox.PlaceholderText = "Tecla Fly"
+flyKeyBox.Text = ""
+flyKeyBox.BackgroundColor3 = Color3.new(0, 0, 0)
+flyKeyBox.TextColor3 = Color3.new(1, 1, 1)
+flyKeyBox.BorderColor3 = Color3.new(1, 1, 1)
+
+local flySpeedBox = Instance.new("TextBox", mainFrame)
+flySpeedBox.Size = UDim2.new(0, 80, 0, 25)
+flySpeedBox.Position = UDim2.new(0, 100, 0, 25)
+flySpeedBox.PlaceholderText = "Velocidad Fly"
+flySpeedBox.Text = ""
+flySpeedBox.BackgroundColor3 = Color3.new(0, 0, 0)
+flySpeedBox.TextColor3 = Color3.new(1, 1, 1)
+flySpeedBox.BorderColor3 = Color3.new(1, 1, 1)
+
+local applyFlyBtn = Instance.new("TextButton", mainFrame)
+applyFlyBtn.Size = UDim2.new(0, 80, 0, 25)
+applyFlyBtn.Position = UDim2.new(0, 190, 0, 25)
+applyFlyBtn.Text = "Aplicar Fly"
+applyFlyBtn.BackgroundColor3 = Color3.new(0, 0, 0)
+applyFlyBtn.TextColor3 = Color3.new(1, 1, 1)
+applyFlyBtn.BorderColor3 = Color3.new(1, 1, 1)
+
+local freecamKeyBox = Instance.new("TextBox", mainFrame)
+freecamKeyBox.Size = UDim2.new(0, 80, 0, 25)
+freecamKeyBox.Position = UDim2.new(0, 10, 0, 70)
+freecamKeyBox.PlaceholderText = "Tecla FreeCam"
+freecamKeyBox.Text = ""
+freecamKeyBox.BackgroundColor3 = Color3.new(0, 0, 0)
+freecamKeyBox.TextColor3 = Color3.new(1, 1, 1)
+freecamKeyBox.BorderColor3 = Color3.new(1, 1, 1)
+
+local freecamSpeedBox = Instance.new("TextBox", mainFrame)
+freecamSpeedBox.Size = UDim2.new(0, 80, 0, 25)
+freecamSpeedBox.Position = UDim2.new(0, 100, 0, 70)
+freecamSpeedBox.PlaceholderText = "Velocidad FreeCam"
+freecamSpeedBox.Text = ""
+freecamSpeedBox.BackgroundColor3 = Color3.new(0, 0, 0)
+freecamSpeedBox.TextColor3 = Color3.new(1, 1, 1)
+freecamSpeedBox.BorderColor3 = Color3.new(1, 1, 1)
+
+local applyFreecamBtn = Instance.new("TextButton", mainFrame)
+applyFreecamBtn.Size = UDim2.new(0, 80, 0, 25)
+applyFreecamBtn.Position = UDim2.new(0, 190, 0, 70)
+applyFreecamBtn.Text = "Aplicar FreeCam"
+applyFreecamBtn.BackgroundColor3 = Color3.new(0, 0, 0)
+applyFreecamBtn.TextColor3 = Color3.new(1, 1, 1)
+applyFreecamBtn.BorderColor3 = Color3.new(1, 1, 1)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local flying = false
+local flyKeyName = ""
+local flySpeed = 50
+local flyVelocity = Vector3.zero
+local flyMoveVector = Vector3.zero
+local flyLerpSpeed = 0.05
+local bounceAmplitude = 0.8
+local bounceFrequency = 3
+local flyStartTime = 0
+
+local freecamActive = false
+local freecamKeyName = ""
+local freecamSpeed = 50
+local freecamVelocity = Vector3.zero
+local freecamOriginal = {}
+
+local scriptEnabled = true
+
+applyFlyBtn.MouseButton1Click:Connect(function()
+	if flyKeyBox.Text ~= "" then flyKeyName = flyKeyBox.Text end
+	local num = tonumber(flySpeedBox.Text)
+	if num then flySpeed = num end
+end)
+
+applyFreecamBtn.MouseButton1Click:Connect(function()
+	if freecamKeyBox.Text ~= "" then freecamKeyName = freecamKeyBox.Text end
+	local num = tonumber(freecamSpeedBox.Text)
+	if num then freecamSpeed = num end
+end)
+
+local function startFly(character)
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	hrp.Anchored = true
+	flyStartTime = tick()
+end
+
+local function stopFly()
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if hrp then hrp.Anchored = false end
+	flyMoveVector = Vector3.zero
+	flyVelocity = Vector3.zero
+end
+
+local function lerp(a, b, t) return a + (b - a) * t end
+local function vectorLerp(a, b, t)
+	return Vector3.new(lerp(a.X, b.X, t), lerp(a.Y, b.Y, t), lerp(a.Z, b.Z, t))
+end
+
+local function toggleFreeCam()
+	if not scriptEnabled then return end
+	local camera = workspace.CurrentCamera
+	local character = player.Character
+	if freecamActive then
+		RunService:UnbindFromRenderStep("FreeCam")
+		camera.CameraType = Enum.CameraType.Custom
+		camera.FieldOfView = freecamOriginal.fov or 70
+		if character then
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then part.Anchored = false end
+			end
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.WalkSpeed = freecamOriginal.walkSpeed or 16
+				humanoid.JumpHeight = freecamOriginal.jumpHeight or 7.2
+			end
+		end
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		UserInputService.MouseIconEnabled = true
+		freecamActive = false
+		return
+	end
+	if not character or not character:FindFirstChild("Head") then return end
+	freecamOriginal.fov = camera.FieldOfView
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = character.Head.CFrame
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		freecamOriginal.walkSpeed = humanoid.WalkSpeed
+		freecamOriginal.jumpHeight = humanoid.JumpHeight
+		humanoid.WalkSpeed = 0
+		humanoid.JumpHeight = 0
+	end
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then part.Anchored = true end
+	end
+	local fov = camera.FieldOfView
+	local shiftHeld = false
+	local rightMouse = false
+	local rotation = Vector2.new(0, 0)
+	local smoothRotation = rotation
+	local smoothPosition = camera.CFrame.Position
+	local inputMovement = {forward=false,backward=false,left=false,right=false,up=false,down=false}
+	UserInputService.InputBegan:Connect(function(i, gp)
+		if gp then return end
+		if i.UserInputType == Enum.UserInputType.MouseButton2 then
+			rightMouse = true
+			UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
+			UserInputService.MouseIconEnabled = false
+		elseif i.KeyCode == Enum.KeyCode.W then inputMovement.forward = true
+		elseif i.KeyCode == Enum.KeyCode.S then inputMovement.backward = true
+		elseif i.KeyCode == Enum.KeyCode.A then inputMovement.left = true
+		elseif i.KeyCode == Enum.KeyCode.D then inputMovement.right = true
+		elseif i.KeyCode == Enum.KeyCode.Space then inputMovement.up = true
+		elseif i.KeyCode == Enum.KeyCode.LeftControl then inputMovement.down = true
+		elseif i.KeyCode == Enum.KeyCode.LeftShift then shiftHeld = true
+		elseif i.KeyCode == Enum.KeyCode.Q then fov -= 3
+		elseif i.KeyCode == Enum.KeyCode.E then fov += 3 end
+	end)
+	UserInputService.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton2 then
+			rightMouse = false
+			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+			UserInputService.MouseIconEnabled = true
+		elseif i.KeyCode == Enum.KeyCode.W then inputMovement.forward = false
+		elseif i.KeyCode == Enum.KeyCode.S then inputMovement.backward = false
+		elseif i.KeyCode == Enum.KeyCode.A then inputMovement.left = false
+		elseif i.KeyCode == Enum.KeyCode.D then inputMovement.right = false
+		elseif i.KeyCode == Enum.KeyCode.Space then inputMovement.up = false
+		elseif i.KeyCode == Enum.KeyCode.LeftControl then inputMovement.down = false
+		elseif i.KeyCode == Enum.KeyCode.LeftShift then shiftHeld = false end
+	end)
+	UserInputService.InputChanged:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseMovement and rightMouse then
+			rotation += Vector2.new(-i.Delta.X, -i.Delta.Y) * 0.3
+		elseif i.UserInputType == Enum.UserInputType.MouseWheel then
+			freecamSpeed = math.clamp(freecamSpeed + i.Position.Z * 2, 1, 999)
+		end
+	end)
+	RunService:BindToRenderStep("FreeCam", Enum.RenderPriority.Camera.Value, function(dt)
+		local dir = Vector3.zero
+		if inputMovement.forward then dir += Vector3.new(0, 0, -1) end
+		if inputMovement.backward then dir += Vector3.new(0, 0, 1) end
+		if inputMovement.left then dir += Vector3.new(-1, 0, 0) end
+		if inputMovement.right then dir += Vector3.new(1, 0, 0) end
+		if inputMovement.up then dir += Vector3.new(0, 1, 0) end
+		if inputMovement.down then dir += Vector3.new(0, -1, 0) end
+		if dir.Magnitude > 0 then dir = dir.Unit end
+		smoothRotation = Vector2.new(lerp(smoothRotation.X, rotation.X, dt * 10), lerp(smoothRotation.Y, rotation.Y, dt * 10))
+		local camRotation = CFrame.Angles(0, math.rad(smoothRotation.X), 0) * CFrame.Angles(math.rad(smoothRotation.Y), 0, 0)
+		local moveVec = camRotation:VectorToWorldSpace(dir) * (shiftHeld and freecamSpeed * 2 or freecamSpeed)
+		freecamVelocity = vectorLerp(freecamVelocity, moveVec, dt * 10)
+		smoothPosition = vectorLerp(smoothPosition, smoothPosition + freecamVelocity * dt, dt * 15)
+		camera.CFrame = camRotation + smoothPosition
+		camera.FieldOfView = lerp(camera.FieldOfView, fov, dt * 5)
+	end)
+	freecamActive = true
+end
+
+UserInputService.InputBegan:Connect(function(input, gp)
+	if gp then return end
+
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		scriptEnabled = not scriptEnabled
+		if not scriptEnabled then
+			if flying then
+				RunService:UnbindFromRenderStep("FlyUpdate")
+				stopFly()
+				flying = false
+			end
+			if freecamActive then
+				toggleFreeCam()
+			end
+		end
+		return
+	end
+
+	if not scriptEnabled then return end
+
+	if input.KeyCode.Name == flyKeyName then
+		if flying then
+			RunService:UnbindFromRenderStep("FlyUpdate")
+			stopFly()
+		else
+			startFly(player.Character)
+			RunService:BindToRenderStep("FlyUpdate", Enum.RenderPriority.Character.Value + 1, function()
+				if not flying then return end
+				local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+				if not hrp then return end
+				local camera = workspace.CurrentCamera
+				local moveDir = Vector3.zero
+				if flyMoveVector.Magnitude > 0 then
+					moveDir = (camera.CFrame.LookVector * flyMoveVector.Z + camera.CFrame.UpVector * flyMoveVector.Y + camera.CFrame.RightVector * flyMoveVector.X * 0.3).Unit * flySpeed
+				end
+				flyVelocity = flyVelocity:Lerp(moveDir, flyLerpSpeed)
+				local bounce = math.sin((tick() - flyStartTime) * bounceFrequency) * bounceAmplitude
+				hrp.CFrame += Vector3.new(flyVelocity.X, flyVelocity.Y + bounce, flyVelocity.Z) * RunService.RenderStepped:Wait()
+			end)
+		end
+		flying = not flying
+	end
+
+	if input.KeyCode.Name == freecamKeyName then
+		toggleFreeCam()
+	end
+
+	if flying then
+		if input.KeyCode == Enum.KeyCode.W then flyMoveVector = Vector3.new(flyMoveVector.X, flyMoveVector.Y, 1)
+		elseif input.KeyCode == Enum.KeyCode.S then flyMoveVector = Vector3.new(flyMoveVector.X, flyMoveVector.Y, -1)
+		elseif input.KeyCode == Enum.KeyCode.A then flyMoveVector = Vector3.new(-1, flyMoveVector.Y, flyMoveVector.Z)
+		elseif input.KeyCode == Enum.KeyCode.D then flyMoveVector = Vector3.new(1, flyMoveVector.Y, flyMoveVector.Z)
+		elseif input.KeyCode == Enum.KeyCode.Space then flyMoveVector = Vector3.new(flyMoveVector.X, 1, flyMoveVector.Z)
+		elseif input.KeyCode == Enum.KeyCode.LeftShift then flyMoveVector = Vector3.new(flyMoveVector.X, -1, flyMoveVector.Z) end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if flying then
+		if input.KeyCode == Enum.KeyCode.W and flyMoveVector.Z == 1 then flyMoveVector = Vector3.new(flyMoveVector.X, flyMoveVector.Y, 0)
+		elseif input.KeyCode == Enum.KeyCode.S and flyMoveVector.Z == -1 then flyMoveVector = Vector3.new(flyMoveVector.X, flyMoveVector.Y, 0)
+		elseif input.KeyCode == Enum.KeyCode.A and flyMoveVector.X == -1 then flyMoveVector = Vector3.new(0, flyMoveVector.Y, flyMoveVector.Z)
+		elseif input.KeyCode == Enum.KeyCode.D and flyMoveVector.X == 1 then flyMoveVector = Vector3.new(0, flyMoveVector.Y, flyMoveVector.Z)
+		elseif input.KeyCode == Enum.KeyCode.Space and flyMoveVector.Y == 1 then flyMoveVector = Vector3.new(flyMoveVector.X, 0, flyMoveVector.Z)
+		elseif input.KeyCode == Enum.KeyCode.LeftShift and flyMoveVector.Y == -1 then flyMoveVector = Vector3.new(flyMoveVector.X, 0, flyMoveVector.Z) end
+	end
+end)
+
+local posFrame = createSection("Guardar / Cargar Posición", 452, 85)
+posFrame.BackgroundColor3 = Color3.new(0,0,0)
+
+local inputSaveKey = Instance.new("TextBox", posFrame)
+inputSaveKey.Size = UDim2.new(0,80,0,25)
+inputSaveKey.Position = UDim2.new(0,10,0,25)
+inputSaveKey.PlaceholderText = "Tecla Guardar"
+inputSaveKey.Text = ""
+inputSaveKey.BackgroundColor3 = Color3.new(0,0,0)
+inputSaveKey.TextColor3 = Color3.new(1,1,1)
+inputSaveKey.BorderColor3 = Color3.new(1,1,1)
+
+local inputLoadKey = Instance.new("TextBox", posFrame)
+inputLoadKey.Size = UDim2.new(0,80,0,25)
+inputLoadKey.Position = UDim2.new(0,100,0,25)
+inputLoadKey.PlaceholderText = "Tecla Cargar"
+inputLoadKey.Text = ""
+inputLoadKey.BackgroundColor3 = Color3.new(0,0,0)
+inputLoadKey.TextColor3 = Color3.new(1,1,1)
+inputLoadKey.BorderColor3 = Color3.new(1,1,1)
+
+local savePosBtn = Instance.new("TextButton", posFrame)
+savePosBtn.Size = UDim2.new(0,80,0,25)
+savePosBtn.Position = UDim2.new(0,10,0,55)
+savePosBtn.Text = "Guardar"
+savePosBtn.BackgroundColor3 = Color3.new(0,0,0)
+savePosBtn.TextColor3 = Color3.new(1,1,1)
+savePosBtn.BorderColor3 = Color3.new(1,1,1)
+
+local teleportModeBtn = Instance.new("TextButton", posFrame)
+teleportModeBtn.Size = UDim2.new(0,80,0,25)
+teleportModeBtn.Position = UDim2.new(0,280,0,25)
+teleportModeBtn.Text = "Modo TP"
+teleportModeBtn.BackgroundColor3 = Color3.new(0,0,0)
+teleportModeBtn.TextColor3 = Color3.new(1,1,1)
+teleportModeBtn.BorderColor3 = Color3.new(1,1,1)
+
+local teleportMode = false
+teleportModeBtn.MouseButton1Click:Connect(function()
+	if ctrlPressed then return end
+	teleportMode = not teleportMode
+	if teleportMode then
+		teleportModeBtn.Text = "TP Activado"
+	else
+		teleportModeBtn.Text = "Modo TP"
+	end
+end)
+
+local mouse = LocalPlayer:GetMouse()
+mouse.Button1Down:Connect(function()
+	if teleportMode and not ctrlPressed then
+		local targetPos = mouse.Hit.Position
+		local char = LocalPlayer.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			char.HumanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(0,3,0))
+		end
+	end
+end)
+
+
+local loadPosBtn = Instance.new("TextButton", posFrame)
+loadPosBtn.Size = UDim2.new(0,80,0,25)
+loadPosBtn.Position = UDim2.new(0,100,0,55)
+loadPosBtn.Text = "Cargar"
+loadPosBtn.BackgroundColor3 = Color3.new(0,0,0)
+loadPosBtn.TextColor3 = Color3.new(1,1,1)
+loadPosBtn.BorderColor3 = Color3.new(1,1,1)
+
+local savedPosition = nil
+
+savePosBtn.MouseButton1Click:Connect(function()
+	if not scriptActive or ctrlPressed then return end
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("HumanoidRootPart") then
+		savedPosition = char.HumanoidRootPart.Position
+	end
+end)
+
+loadPosBtn.MouseButton1Click:Connect(function()
+	if not scriptActive or ctrlPressed then return end
+	if savedPosition then
+		local char = LocalPlayer.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			char.HumanoidRootPart.CFrame = CFrame.new(savedPosition)
+		end
+	end
+end)
+
+togglePlayerXray.MouseButton1Click:Connect(function()
+	if ctrlPressed then return end
+	if not playerXrayOn then
+		applyPlayerXray()
+		togglePlayerXray.Text = "Desactivar"
+	else
+		removePlayerXray()
+		togglePlayerXray.Text = "Activar"
+	end
+	playerXrayOn = not playerXrayOn
+end)
+
+Players.PlayerAdded:Connect(function(plr)
+	if playerXrayOn and plr ~= LocalPlayer then
+		local function setupChar()
+			if plr.Character then
+				local hl = Instance.new("Highlight")
+				hl.Adornee = plr.Character
+				hl.FillColor = Color3.new(0, 1, 0.501961)
+				hl.OutlineColor = Color3.new(1, 1, 1)
+				hl.FillTransparency = 0.5
+				hl.Parent = plr.Character
+				playerHighlights[plr] = hl
+
+				if not playerBillboards[plr] then
+					local billboard = Instance.new("BillboardGui")
+					billboard.Name = "ESPBillboard"
+					billboard.Size = UDim2.new(0,150,0,50)
+					billboard.AlwaysOnTop = true
+					local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+					if hrp then
+						billboard.Adornee = hrp
+					end
+					billboard.Parent = plr.Character
+
+					local nameLabel = Instance.new("TextLabel", billboard)
+					nameLabel.Size = UDim2.new(1,0,0.5,0)
+					nameLabel.BackgroundTransparency = 1
+					nameLabel.TextColor3 = Color3.new(1, 1, 1)
+					nameLabel.TextScaled = true
+					nameLabel.Font = Enum.Font.SourceSansBold
+					nameLabel.Text = plr.Name
+
+					local distLabel = Instance.new("TextLabel", billboard)
+					distLabel.Size = UDim2.new(1,0,0.5,0)
+					distLabel.Position = UDim2.new(0,0,0.5,0)
+					distLabel.BackgroundTransparency = 1
+					distLabel.TextColor3 = Color3.new(1,1,0)
+					distLabel.TextScaled = true
+					distLabel.Font = Enum.Font.SourceSans
+					distLabel.Text = "Distancia: 0"
+
+					playerBillboards[plr] = distLabel
+				end
+			end
+		end
+		plr.CharacterAdded:Connect(setupChar)
+		setupChar()
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if playerXrayOn then
+		for plr, label in pairs(playerBillboards) do
+			if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+				label.Text = "Distancia: "..math.floor(dist).." studs"
+
+				local transparency = math.clamp(dist / 200, 0, 1)
+				label.TextTransparency = transparency
+
+				local nameLabel = label.Parent:FindFirstChildOfClass("TextLabel")
+				if nameLabel then
+					nameLabel.TextTransparency = transparency
+				end
+			end
+		end
+	end
+end)
+
+RunService.DescendantAdded:Connect(function(obj)
+	if mapXrayOn and (obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation")) and not Players:GetPlayerFromCharacter(obj.Parent) then
+		local hl = Instance.new("Highlight")
+		hl.Adornee = obj
+		hl.FillColor = obj.Color
+		hl.OutlineColor = Color3.new(1,1,1)
+		hl.FillTransparency = 0.5
+		hl.Parent = obj
+		mapHighlights[obj] = hl
+		originalMaterialsMap[obj] = {Material=obj.Material, Transparency=obj.Transparency}
+		obj.Material = Enum.Material.Glass
+		obj.Transparency = 1
+	end
+end)
+
+
+local applyKeysBtn = Instance.new("TextButton", posFrame)
+applyKeysBtn.Size = UDim2.new(0,80,0,25)
+applyKeysBtn.Position = UDim2.new(0,190,0,25)
+applyKeysBtn.Text = "Aplicar"
+applyKeysBtn.BackgroundColor3 = Color3.new(0,0,0)
+applyKeysBtn.TextColor3 = Color3.new(1,1,1)
+applyKeysBtn.BorderColor3 = Color3.new(1,1,1)
+
+local saveKeyName = nil
+local loadKeyName = nil
+
+applyKeysBtn.MouseButton1Click:Connect(function()
+	saveKeyName = inputSaveKey.Text
+	loadKeyName = inputLoadKey.Text
+end)
+
+local keyDown = false
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe or not scriptActive then return end
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		ctrlPressed = not ctrlPressed
+		return
+	end
+	if ctrlPressed then return end
+	if input.KeyCode == Enum.KeyCode.N and not keyDown then
+		keyDown = true
+		screenGui.Enabled = not screenGui.Enabled
+		if screenGui.Enabled then
+			liberationMouse.Modal = true
+		else
+			liberationMouse.Modal = false
+		end
+	end
+	if input.KeyCode.Name == saveKeyName then
+		local char = LocalPlayer.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			savedPosition = char.HumanoidRootPart.Position
+		end
+	elseif input.KeyCode.Name == loadKeyName then
+		if savedPosition then
+			local char = LocalPlayer.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				char.HumanoidRootPart.CFrame = CFrame.new(savedPosition)
+			end
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gpe)
+	if input.KeyCode == Enum.KeyCode.N then
+		keyDown = false
+	end
+end)
