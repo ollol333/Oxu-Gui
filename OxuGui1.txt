@@ -546,6 +546,7 @@ local function createTeleportPrompt(position)
 	prompt.ActionText = labelText
 	prompt.KeyboardKeyCode = keyPrompt
 	prompt.MaxActivationDistance = math.huge
+	prompt.RequiresLineOfSight = false
 	prompt.Style = styleCustom and Enum.ProximityPromptStyle.Custom or Enum.ProximityPromptStyle.Default
 	prompt.Parent = part
 
@@ -690,4 +691,5 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 refreshPlayerList()
+
 
