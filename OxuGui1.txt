@@ -4,8 +4,10 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local screenGui = Instance.new("ScreenGui", PlayerGui)
+local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "OxuGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
 
 local liberationMouse = Instance.new("TextButton")
 liberationMouse.Name = "LiberationMouse"
@@ -688,3 +690,4 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 refreshPlayerList()
+
