@@ -387,7 +387,6 @@ local function removeXray()
 	highlights = {}
 end
 
--- === PANEL DE PROMPTS TELEPORT ===
 local active = true
 
 local UserInputService = game:GetService("UserInputService")
@@ -604,7 +603,6 @@ deleteAllBtn.MouseButton1Click:Connect(deleteAllPrompts)
 toggleVisibilityBtn.MouseButton1Click:Connect(togglePromptsVisibility)
 styleToggleBtn.MouseButton1Click:Connect(togglePromptStyle)
 
--- Teclas rápidas
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
 	if input.UserInputType == Enum.UserInputType.Keyboard then
