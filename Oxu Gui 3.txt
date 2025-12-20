@@ -1,0 +1,226 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+--// VARIABLES
+local selectedPlayers = {} -- [player] = true
+local buttons = {}
+local aimEnabled = false
+local aimKey = nil
+local aimPartName = "HumanoidRootPart" -- "Head"
+
+--// GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.fromScale(0.28, 0.55)
+Frame.Position = UDim2.fromScale(0.03, 0.2)
+Frame.BackgroundColor3 = Color3.new(0,0,0)
+Frame.Parent = ScreenGui
+Instance.new("UIStroke", Frame).Color = Color3.new(1,1,1)
+
+--// TITLE
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1,0,0,40)
+Title.BackgroundTransparency = 1
+Title.Text = "Aim"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Frame
+
+--// AIM KEY UI
+local KeyBox = Instance.new("TextBox")
+KeyBox.PlaceholderText = "Aim Key (Ej: L)"
+KeyBox.Size = UDim2.new(0.6,-5,0,30)
+KeyBox.Position = UDim2.new(0,5,0,45)
+KeyBox.BackgroundColor3 = Color3.new(0,0,0)
+KeyBox.TextColor3 = Color3.new(1,1,1)
+KeyBox.Parent = Frame
+Instance.new("UIStroke", KeyBox).Color = Color3.new(1,1,1)
+
+local ApplyBtn = Instance.new("TextButton")
+ApplyBtn.Text = "Apply"
+ApplyBtn.Size = UDim2.new(0.4,-10,0,30)
+ApplyBtn.Position = UDim2.new(0.6,5,0,45)
+ApplyBtn.BackgroundColor3 = Color3.new(0,0,0)
+ApplyBtn.TextColor3 = Color3.new(1,1,1)
+ApplyBtn.Parent = Frame
+Instance.new("UIStroke", ApplyBtn).Color = Color3.new(1,1,1)
+
+--// PART SELECT BUTTONS
+local HRPBtn = Instance.new("TextButton")
+HRPBtn.Text = "HumanoidRootPart"
+HRPBtn.Size = UDim2.new(0.5,-7,0,30)
+HRPBtn.Position = UDim2.new(0,5,0,80)
+HRPBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+HRPBtn.TextColor3 = Color3.new(1,1,1)
+HRPBtn.TextScaled = true
+HRPBtn.Parent = Frame
+Instance.new("UIStroke", HRPBtn).Color = Color3.new(1,1,1)
+
+local HeadBtn = Instance.new("TextButton")
+HeadBtn.Text = "Head"
+HeadBtn.Size = UDim2.new(0.5,-7,0,30)
+HeadBtn.Position = UDim2.new(0.5+0.01,0,0,80)
+HeadBtn.BackgroundColor3 = Color3.new(0,0,0)
+HeadBtn.TextColor3 = Color3.new(1,1,1)
+HeadBtn.TextScaled = true
+HeadBtn.Parent = Frame
+Instance.new("UIStroke", HeadBtn).Color = Color3.new(1,1,1)
+
+local function updatePartButtons()
+	HRPBtn.BackgroundColor3 = (aimPartName == "HumanoidRootPart")
+		and Color3.fromRGB(80,80,80) or Color3.new(0,0,0)
+
+	HeadBtn.BackgroundColor3 = (aimPartName == "Head")
+		and Color3.fromRGB(80,80,80) or Color3.new(0,0,0)
+end
+
+HRPBtn.MouseButton1Click:Connect(function()
+	aimPartName = "HumanoidRootPart"
+	updatePartButtons()
+end)
+
+HeadBtn.MouseButton1Click:Connect(function()
+	aimPartName = "Head"
+	updatePartButtons()
+end)
+
+--// SCROLL
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Position = UDim2.new(0,0,0,120)
+Scroll.Size = UDim2.new(1,0,1,-120)
+Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Scroll.BackgroundTransparency = 1
+Scroll.Parent = Frame
+
+local layout = Instance.new("UIListLayout", Scroll)
+layout.Padding = UDim.new(0,5)
+
+--// FUNCTIONS
+local function updateButtonColor(player)
+	if buttons[player] then
+		buttons[player].BackgroundColor3 =
+			selectedPlayers[player] and Color3.fromRGB(80,80,80) or Color3.new(0,0,0)
+	end
+end
+
+local function toggleSelect(player)
+	if selectedPlayers[player] then
+		selectedPlayers[player] = nil
+	else
+		selectedPlayers[player] = true
+	end
+	updateButtonColor(player)
+end
+
+--// CREATE BUTTON WITH AVATAR
+local function createButton(player)
+	if player == LocalPlayer then return end
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1,-10,0,45)
+	btn.BackgroundColor3 = Color3.new(0,0,0)
+	btn.Text = ""
+	btn.Parent = Scroll
+	buttons[player] = btn
+	Instance.new("UIStroke", btn).Color = Color3.new(1,1,1)
+
+	local avatar = Instance.new("ImageLabel")
+	avatar.Size = UDim2.new(0,36,0,36)
+	avatar.Position = UDim2.new(0,5,0.5,-18)
+	avatar.BackgroundTransparency = 0
+	avatar.BackgroundColor3 = Color3.new(0,0,0)
+	avatar.Parent = btn
+	Instance.new("UIStroke", avatar).Color = Color3.new(1,1,1)
+
+	local img = Players:GetUserThumbnailAsync(
+		player.UserId,
+		Enum.ThumbnailType.HeadShot,
+		Enum.ThumbnailSize.Size420x420
+	)
+	avatar.Image = img
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Size = UDim2.new(1,-50,1,0)
+	nameLabel.Position = UDim2.new(0,50,0,0)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Text = player.Name
+	nameLabel.TextColor3 = Color3.new(1,1,1)
+	nameLabel.TextScaled = true
+	nameLabel.Font = Enum.Font.Gotham
+	nameLabel.Parent = btn
+
+	btn.MouseButton1Click:Connect(function()
+		toggleSelect(player)
+	end)
+end
+
+local function removePlayer(player)
+	if buttons[player] then
+		buttons[player]:Destroy()
+		buttons[player] = nil
+	end
+	selectedPlayers[player] = nil
+end
+
+--// PLAYER EVENTS
+for _,p in pairs(Players:GetPlayers()) do
+	createButton(p)
+end
+Players.PlayerAdded:Connect(createButton)
+Players.PlayerRemoving:Connect(removePlayer)
+
+--// AIM LOGIC
+RunService.RenderStepped:Connect(function()
+	if not aimEnabled then return end
+
+	local closestPart = nil
+	local closestDist = math.huge
+
+	for player in pairs(selectedPlayers) do
+		local char = player.Character
+		local part = char and char:FindFirstChild(aimPartName)
+		if part then
+			local dist = (Camera.CFrame.Position - part.Position).Magnitude
+			if dist < closestDist then
+				closestDist = dist
+				closestPart = part
+			end
+		end
+	end
+
+	if closestPart then
+		Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestPart.Position)
+	end
+end)
+
+--// INPUT
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+
+	if input.KeyCode == Enum.KeyCode.K then
+		Frame.Visible = not Frame.Visible
+	end
+
+	if aimKey and input.KeyCode == aimKey then
+		aimEnabled = not aimEnabled
+	end
+end)
+
+ApplyBtn.MouseButton1Click:Connect(function()
+	local txt = KeyBox.Text
+	if txt ~= "" then
+		local key = Enum.KeyCode[txt:upper()]
+		if key then
+			aimKey = key
+		end
+	end
+end)
