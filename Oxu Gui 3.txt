@@ -1,4 +1,3 @@
---// SERVICES
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -6,14 +5,12 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
---// VARIABLES
 local selectedPlayers = {} -- [player] = true
 local buttons = {}
 local aimEnabled = false
 local aimKey = nil
-local aimPartName = "HumanoidRootPart" -- "Head"
+local aimPartName = "HumanoidRootPart"
 
---// GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -25,7 +22,6 @@ Frame.BackgroundColor3 = Color3.new(0,0,0)
 Frame.Parent = ScreenGui
 Instance.new("UIStroke", Frame).Color = Color3.new(1,1,1)
 
---// TITLE
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1,0,0,40)
 Title.BackgroundTransparency = 1
@@ -35,7 +31,6 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Frame
 
---// AIM KEY UI
 local KeyBox = Instance.new("TextBox")
 KeyBox.PlaceholderText = "Aim Key (Ej: L)"
 KeyBox.Size = UDim2.new(0.6,-5,0,30)
@@ -54,7 +49,6 @@ ApplyBtn.TextColor3 = Color3.new(1,1,1)
 ApplyBtn.Parent = Frame
 Instance.new("UIStroke", ApplyBtn).Color = Color3.new(1,1,1)
 
---// PART SELECT BUTTONS
 local HRPBtn = Instance.new("TextButton")
 HRPBtn.Text = "HumanoidRootPart"
 HRPBtn.Size = UDim2.new(0.5,-7,0,30)
@@ -93,7 +87,6 @@ HeadBtn.MouseButton1Click:Connect(function()
 	updatePartButtons()
 end)
 
---// SCROLL
 local Scroll = Instance.new("ScrollingFrame")
 Scroll.Position = UDim2.new(0,0,0,120)
 Scroll.Size = UDim2.new(1,0,1,-120)
@@ -104,7 +97,6 @@ Scroll.Parent = Frame
 local layout = Instance.new("UIListLayout", Scroll)
 layout.Padding = UDim.new(0,5)
 
---// FUNCTIONS
 local function updateButtonColor(player)
 	if buttons[player] then
 		buttons[player].BackgroundColor3 =
@@ -171,14 +163,12 @@ local function removePlayer(player)
 	selectedPlayers[player] = nil
 end
 
---// PLAYER EVENTS
 for _,p in pairs(Players:GetPlayers()) do
 	createButton(p)
 end
 Players.PlayerAdded:Connect(createButton)
 Players.PlayerRemoving:Connect(removePlayer)
 
---// AIM LOGIC
 RunService.RenderStepped:Connect(function()
 	if not aimEnabled then return end
 
@@ -187,7 +177,15 @@ RunService.RenderStepped:Connect(function()
 
 	for player in pairs(selectedPlayers) do
 		local char = player.Character
-		local part = char and char:FindFirstChild(aimPartName)
+		if not char then continue end
+
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then
+			-- Está muerto → no se mira
+			continue
+		end
+
+		local part = char:FindFirstChild(aimPartName)
 		if part then
 			local dist = (Camera.CFrame.Position - part.Position).Magnitude
 			if dist < closestDist then
@@ -202,7 +200,6 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
---// INPUT
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
 
